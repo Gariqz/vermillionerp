@@ -97,12 +97,14 @@ const HRDashboard = () => {
 
   const handleOpenForm = (employee = null) => {
     if (employee) {
-      setFormData(employee);
+      // Jika edit, sediakan field password kosong (opsional diisi)
+      setFormData({ ...employee, password: "" });
       setSelectedEmployee(employee);
     } else {
       setFormData({
         name: "",
         email: "",
+        password: "", // Tambahkan inisiasi password di sini
         phone: "",
         dob: "",
         address: "",
@@ -117,34 +119,64 @@ const HRDashboard = () => {
     setIsModalOpen(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.role) {
       showNotification("error", "Silakan isi semua field yang wajib!");
       return;
     }
 
-    if (selectedEmployee) {
-      setEmployees(
-        employees.map((emp) =>
-          emp.id === selectedEmployee.id ? { ...formData, id: emp.id } : emp,
-        ),
-      );
-      showNotification(
-        "success",
-        `Karyawan ${formData.name} berhasil diperbarui!`,
-      );
-    } else {
-      setEmployees([
-        ...employees,
-        { ...formData, id: Math.max(...employees.map((e) => e.id), 0) + 1 },
-      ]);
-      showNotification(
-        "success",
-        `Karyawan ${formData.name} berhasil ditambahkan!`,
-      );
+    try {
+      // Kita siapkan data yang akan dikirim ke Laravel.
+      // Ubah 'bankAccount' dari React state menjadi 'bank_account' sesuai kolom di database MySQL
+      const payload = {
+        ...formData,
+        bank_account: formData.bankAccount,
+      };
+
+      if (selectedEmployee) {
+        // PROSES EDIT DATA (PUT)
+        const response = await axios.put(`http://localhost:8000/api/employees/${selectedEmployee.id}`, payload);
+        
+        // Update state lokal dengan data dari server
+        setEmployees(
+          employees.map((emp) =>
+            emp.id === selectedEmployee.id ? response.data : emp
+          )
+        );
+        showNotification("success", `Karyawan ${formData.name} berhasil diperbarui!`);
+      } else {
+        // PROSES TAMBAH DATA (POST)
+        const response = await axios.post("http://localhost:8000/api/employees", payload);
+        
+        // Tambahkan data baru dari server ke state lokal
+        setEmployees([...employees, response.data]);
+        showNotification("success", `Karyawan ${formData.name} berhasil ditambahkan!`);
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error saving data:", error);
+      // Tangkap pesan error dari Laravel jika email sudah dipakai
+      const errorMsg = error.response?.data?.message || "Terjadi kesalahan pada server!";
+      showNotification("error", errorMsg);
     }
-    setIsModalOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (employeeToDelete) {
+      try {
+        // PROSES HAPUS DATA (DELETE)
+        await axios.delete(`http://localhost:8000/api/employees/${employeeToDelete.id}`);
+        
+        setEmployees(employees.filter((emp) => emp.id !== employeeToDelete.id));
+        showNotification("success", `Karyawan ${employeeToDelete.name} berhasil dihapus!`);
+        setIsDeleteConfirmOpen(false);
+        setEmployeeToDelete(null);
+      } catch (error) {
+        console.error("Error deleting data:", error);
+        showNotification("error", "Gagal menghapus data dari server.");
+      }
+    }
   };
 
   const handleDeleteClick = (id) => {
@@ -153,17 +185,17 @@ const HRDashboard = () => {
     setIsDeleteConfirmOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (employeeToDelete) {
-      setEmployees(employees.filter((emp) => emp.id !== employeeToDelete.id));
-      showNotification(
-        "success",
-        `Karyawan ${employeeToDelete.name} berhasil dihapus!`,
-      );
-      setIsDeleteConfirmOpen(false);
-      setEmployeeToDelete(null);
-    }
-  };
+  // const handleConfirmDelete = () => {
+  //   if (employeeToDelete) {
+  //     setEmployees(employees.filter((emp) => emp.id !== employeeToDelete.id));
+  //     showNotification(
+  //       "success",
+  //       `Karyawan ${employeeToDelete.name} berhasil dihapus!`,
+  //     );
+  //     setIsDeleteConfirmOpen(false);
+  //     setEmployeeToDelete(null);
+  //   }
+  // };
 
   const handleExport = () => {
     const csv = [
@@ -586,7 +618,22 @@ const HRDashboard = () => {
                   placeholder="email@example.com"
                 />
               </div>
-
+              {/* Kolom Password Baru */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-text-primary">
+                  Password {selectedEmployee ? "(Kosongkan jika tidak diubah)" : "*"}
+                </label>
+                <input
+                  type="text" // Gunakan 'text' agar HR bisa melihat password yang dibuatkan, atau 'password' jika ingin disensor
+                  required={!selectedEmployee} // Wajib diisi JIKA karyawan baru (bukan mode edit)
+                  value={formData.password || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all text-sm"
+                  placeholder={selectedEmployee ? "Kosongkan jika tetap pakai password lama" : "Buatkan password"}
+                />
+              </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-bold text-text-primary">
                   Telepon
