@@ -64,7 +64,7 @@ const MainLayout = () => {
     {
       name: "Pengaduan",
       icon: <Megaphone size={20} />,
-      path: "",
+      path: "/dashboard-host/pengaduan",
     },
     {
       name: "Request",
