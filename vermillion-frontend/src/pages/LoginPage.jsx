@@ -14,7 +14,7 @@ const LoginPage = () => {
 
     try {
       const response = await axios.post(
-       `${import.meta.env.VITE_API_URL}/login`,
+       "http://127.0.0.1:8000/api/login",
         {
           email,
           password,

@@ -64,7 +64,7 @@ const HRDashboard = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/employees`,
+        const response = await axios.get(`http://127.0.0.1:8000/api/employees`,
           {
               headers: {
               "ngrok-skip-browser-warning": "69420"

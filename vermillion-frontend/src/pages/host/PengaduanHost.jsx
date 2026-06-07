@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Search, Plus, Upload, Edit, Trash2, Eye, X, CheckCircle, FileText, FileImage } from 'lucide-react';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
 
-const API_URL = `${import.meta.env.VITE_API_URL}`;
+const API_URL = `http://127.0.0.1:8000/api`;
 
 const PengaduanHost = () => {
   const [view, setView] = useState('list'); // 'list' atau 'editor'
