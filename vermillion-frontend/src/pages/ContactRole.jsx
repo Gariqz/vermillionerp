@@ -20,7 +20,7 @@ useEffect(() => {
     const fetchContacts = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/contacts`, 
+          `${import.meta.env.VITE_API_URL}/employees`, 
           {
             headers: {
               "ngrok-skip-browser-warning": "69420"
