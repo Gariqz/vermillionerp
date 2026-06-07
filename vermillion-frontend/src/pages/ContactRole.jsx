@@ -53,21 +53,26 @@ useEffect(() => {
   }, [contactData]);
 
   // Filter pencarian berdasarkan nama atau tim
-  const filteredContacts = useMemo(() => {
-    return contactData.filter((contact) => {
-      const nameMatch = contact.name
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const teamMatch = contact.team
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const matchesSearch = nameMatch || teamMatch;
+const filteredContacts = useMemo(() => {
+  return contactData.filter((contact) => {
+    // 1. Ambil nilai team dengan mencari di berbagai kemungkinan nama kolom
+    const teamValue = contact.team || contact.divisi || contact.department || "";
+    
+    // 2. Pastikan searchTerm tidak error jika kosong
+    const searchLower = searchTerm.toLowerCase();
 
-      const matchesFilter =
-        activeFilter === "All" || contact.team === activeFilter;
-      return matchesSearch && matchesFilter;
-    });
-  }, [searchTerm, activeFilter, contactData]);
+    // 3. Cek pencarian (name atau team)
+    const nameMatch = contact.name?.toLowerCase().includes(searchLower);
+    const teamMatch = teamValue.toLowerCase().includes(searchLower);
+    const matchesSearch = nameMatch || teamMatch;
+
+    // 4. Cek Filter (Otomatis menyesuaikan dengan nama kolom yang ditemukan)
+    const matchesFilter =
+      activeFilter === "All" || teamValue === activeFilter;
+
+    return matchesSearch && matchesFilter;
+  });
+}, [searchTerm, activeFilter, contactData]);
 
   const openWhatsApp = (number) => {
     if (!number) return alert("Nomor WhatsApp tidak tersedia");
@@ -137,22 +142,23 @@ useEffect(() => {
                 <div className="absolute -right-4 -top-4 w-20 h-20 bg-orange-500/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
 
                 <div className="flex items-start gap-4 relative z-10">
-                  <div className="w-14 h-14 bg-gradient-to-tr from-orange-100 to-white border border-orange-200 rounded-2xl flex items-center justify-center text-orange-600 shadow-sm">
-                    <Briefcase size={24} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-800 group-hover:text-orange-600 transition-colors">
-                      {contact.name}
-                    </h4>
-                    <p className="text-[10px] font-bold text-orange-500 tracking-widest mb-1">
-                      {contact.team}
-                    </p>
-                    <p className="text-xs text-gray-400 flex items-center gap-1">
-                      <ShieldCheck size={12} className="text-emerald-500" />{" "}
-                      {contact.role || "Staff"}
-                    </p>
-                  </div>
-                </div>
+    <div className="w-14 h-14 bg-gradient-to-tr from-orange-100 to-white border border-orange-200 rounded-2xl flex items-center justify-center text-orange-600">
+      <Briefcase size={24} />
+    </div>
+    <div>
+      <h4 className="font-bold text-gray-800">
+        {contact.name || "Tanpa Nama"}
+      </h4>
+      {/* KITA CEK SEMUA OPSI NAMA KOLOM TEAM DI SINI */}
+      <p className="text-[10px] font-bold text-orange-500 tracking-widest mb-1 uppercase">
+        {contact.team || contact.divisi || contact.department || "General"}
+      </p>
+      <p className="text-xs text-gray-400 flex items-center gap-1">
+        <ShieldCheck size={12} className="text-emerald-500" />{" "}
+        {contact.role || "Staff"}
+      </p>
+    </div>
+  </div>
 
                 <div className="mt-6 flex gap-2 relative z-10">
                   <button
