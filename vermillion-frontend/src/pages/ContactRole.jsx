@@ -41,42 +41,40 @@ const ContactRole = () => {
   }, []);
 
   // Membuat tombol filter (Chips) otomatis mengikuti nama tim yang unik dari DB
-  const divisions = useMemo(() => {
-    const baseDivisions = ["All"];
-    contactData.forEach((user) => {
-      // Sama seperti filter, kita ambil nama kolom yang valid
-      const teamValue =
-        user.team || user.divisi || user.department || "General";
-
-      if (!baseDivisions.includes(teamValue)) {
-        baseDivisions.push(teamValue);
-      }
-    });
-    return baseDivisions;
-  }, [contactData]);
+ const divisions = useMemo(() => {
+  const baseDivisions = ["All"];
+  
+  contactData.forEach((user) => {
+    // Cari nilai divisi yang valid dari kolom apapun yang ada isinya
+    const teamValue = user.team || user.divisi || user.department || user.role;
+    
+    // HANYA masukkan ke list kalau ada isinya dan belum ada di tombol filter
+    if (teamValue && !baseDivisions.includes(teamValue)) {
+      baseDivisions.push(teamValue);
+    }
+  });
+  
+  return baseDivisions;
+}, [contactData]);
 
   // Filter pencarian berdasarkan nama atau tim
   const filteredContacts = useMemo(() => {
-    return contactData.filter((contact) => {
-      // 1. Ambil nilai team dengan mencari di berbagai kemungkinan nama kolom
-      const teamValue =
-        contact.team || contact.divisi || contact.department || "";
-
-      // 2. Pastikan searchTerm tidak error jika kosong
-      const searchLower = searchTerm.toLowerCase();
-
-      // 3. Cek pencarian (name atau team)
-      const nameMatch = contact.name?.toLowerCase().includes(searchLower);
-      const teamMatch = teamValue.toLowerCase().includes(searchLower);
-      const matchesSearch = nameMatch || teamMatch;
-
-      // 4. Cek Filter (Otomatis menyesuaikan dengan nama kolom yang ditemukan)
-      const matchesFilter =
-        activeFilter === "All" || teamValue === activeFilter;
-
-      return matchesSearch && matchesFilter;
-    });
-  }, [searchTerm, activeFilter, contactData]);
+  return contactData.filter((contact) => {
+    // Standarisasi cara ambil divisi agar sama persis dengan 'divisions'
+    const teamValue = contact.team || contact.divisi || contact.department || contact.role || "";
+    
+    const searchLower = searchTerm.toLowerCase();
+    const nameMatch = contact.name?.toLowerCase().includes(searchLower);
+    const teamMatch = teamValue.toLowerCase().includes(searchLower);
+    
+    const matchesSearch = nameMatch || teamMatch;
+    
+    // Sekarang filter 'All' atau berdasarkan 'teamValue' yang sudah terstandarisasi
+    const matchesFilter = activeFilter === "All" || teamValue === activeFilter;
+    
+    return matchesSearch && matchesFilter;
+  });
+}, [searchTerm, activeFilter, contactData]);
 
   const openWhatsApp = (number) => {
     if (!number) return alert("Nomor WhatsApp tidak tersedia");
