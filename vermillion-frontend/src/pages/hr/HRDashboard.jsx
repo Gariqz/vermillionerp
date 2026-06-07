@@ -64,12 +64,13 @@ const HRDashboard = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/employees`,
+        const response = await axios.get(
+          `http://127.0.0.1:8000/api/employees`,
           {
-              headers: {
-              "ngrok-skip-browser-warning": "69420"
-            }
-          }
+            headers: {
+              "ngrok-skip-browser-warning": "69420",
+            },
+          },
         );
         setEmployees(response.data); // Memasukkan data dari Laravel ke dalam state
       } catch (error) {
@@ -104,7 +105,6 @@ const HRDashboard = () => {
 
   const handleOpenForm = (employee = null) => {
     if (employee) {
-      // Jika edit, sediakan field password kosong (opsional diisi)
       setFormData({ ...employee, password: "" });
       setSelectedEmployee(employee);
     } else {
@@ -268,7 +268,29 @@ const HRDashboard = () => {
     a.click();
     showNotification("success", "Data berhasil diekspor ke CSV!");
   };
+  const parseDateToISO = (value) => {
+    if (!value) return "";
+    const str = String(value).trim();
 
+    // Sudah format benar: "1995-03-15"
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+
+    // Format M/D/YY atau M/D/YYYY (hasil raw:false dari SheetJS)
+    const mdyMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+    if (mdyMatch) {
+      let [, m, d, y] = mdyMatch;
+      if (y.length === 2) y = parseInt(y) > 30 ? `19${y}` : `20${y}`;
+      return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    }
+
+    // Fallback: coba parse dengan Date
+    const date = new Date(str);
+    if (!isNaN(date)) {
+      return date.toISOString().split("T")[0];
+    }
+
+    return "";
+  };
   const handleImportFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -278,56 +300,89 @@ const HRDashboard = () => {
     reader.onload = async (event) => {
       try {
         const data = new Uint8Array(event.target.result);
-
         const workbook = XLSX.read(data, { type: "array" });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
 
-        const rows = XLSX.utils.sheet_to_json(worksheet);
+        const rows = XLSX.utils.sheet_to_json(worksheet, {
+          defval: "",
+          raw: false,
+          dateNF: "yyyy-mm-dd",
+        });
+
+        const get = (row, ...keys) => {
+          for (const key of keys) {
+            if (row[key] !== undefined && row[key] !== "")
+              return String(row[key]);
+            const found = Object.keys(row).find(
+              (k) => k.trim().toLowerCase() === key.trim().toLowerCase(),
+            );
+            if (found && row[found] !== undefined && row[found] !== "")
+              return String(row[found]);
+          }
+          return "";
+        };
 
         let successCount = 0;
         let failCount = 0;
 
         for (const row of rows) {
           const payload = {
-            name: row.Nama,
-            email: row.Email,
-            phone: row.Telepon,
-            dob: row["Tanggal Lahir"],
-            address: row.Alamat,
-            role: row.Role,
-            status: row.Status,
-            contract: row.Kontrak,
-            bank_account: row["No Rekening"] || row["No. Rekening"],
-            password: "vermillion123",
+            name: get(row, "Nama", "name", "NAMA"),
+            email: get(row, "Email", "email", "EMAIL"),
+            phone: get(row, "Telepon", "phone", "No HP", "No. HP", "TELEPON"),
+            dob: parseDateToISO(
+              get(row, "Tanggal Lahir", "Tgl Lahir", "dob", "DOB"),
+            ),
+            address: get(row, "Alamat", "address", "ALAMAT"),
+            role: get(row, "Role", "role", "ROLE"),
+            status: get(row, "Status", "status", "STATUS") || "Aktif",
+            contract: get(row, "Kontrak", "contract", "KONTRAK") || "12 Bulan",
+            bank_account: get(
+              row,
+              "No Rekening",
+              "No. Rekening",
+              "bank_account",
+              "Rekening",
+            ),
+            password: get(row, "Password", "password") || "vermillion123",
           };
+
+          if (!payload.name && !payload.email) continue;
+
+          console.log("Importing row:", payload); // untuk debug
 
           try {
             await axios.post("http://localhost:8000/api/employees", payload);
             successCount++;
           } catch (apiError) {
-            console.log("ERROR DATA:", apiError.response?.data);
+            console.log("ERROR:", apiError.response?.data);
             console.log("PAYLOAD:", payload);
             failCount++;
           }
         }
 
-        // ambil ulang data setelah import selesai
-        const response = await axios.get("http://localhost:8000/api/employees");
+        const response = await axios.get(
+          "http://127.0.0.1:8000/api/employees",
+          {
+            headers: { "ngrok-skip-browser-warning": "69420" },
+          },
+        );
         setEmployees(response.data);
 
         showNotification(
-          "success",
+          failCount === 0 ? "success" : "error",
           `Import selesai. Berhasil: ${successCount}, Gagal: ${failCount}`,
         );
       } catch (error) {
         console.error(error);
-        showNotification("error", "Gagal membaca file Excel");
+        showNotification("error", "Gagal membaca file Excel/CSV");
       }
     };
 
     reader.readAsArrayBuffer(file);
   };
+
   return (
     <div className="animate-fade-in space-y-4">
       {notification && (

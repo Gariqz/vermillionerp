@@ -49,7 +49,7 @@ const ProfilePage = () => {
   };
   const handleLogout = () => {
   localStorage.removeItem("user");
-  window.location.href = "/login";
+    window.location.href = "/";
 };
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-10">
