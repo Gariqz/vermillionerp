@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Facility extends Model
 {
     protected $table = 'facilities';
-
+    public $timestamps = false;
     protected $fillable = [
         'facility_name',
         'facility_type',
@@ -20,5 +20,6 @@ class Facility extends Model
     public function requests()
     {
         return $this->hasMany(FacilityRequest::class, 'facility_id');
+        
     }
 }

@@ -17,11 +17,15 @@ const PengaduanHost = () => {
   localStorage.getItem("user") || "{}"
 );
 
+const [loading, setLoading] = useState(true);
 
 const employeeId = user?.id;
 //load complaints
 const loadComplaints = async () => {
   try {
+
+    setLoading(true);
+
     const response = await axios.get(
       `${API_URL}/complaints`
     );
@@ -33,7 +37,13 @@ const loadComplaints = async () => {
     setModules(myComplaints);
 
   } catch (error) {
+
     console.error(error);
+
+  } finally {
+
+    setLoading(false);
+
   }
 };
 
@@ -178,29 +188,76 @@ useEffect(() => {
           </div>
 
           <div className="bg-white rounded-[24px] border border-orange-100 shadow-sm p-4 md:p-6 flex-1 overflow-y-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {modules.map(mod => (
-                <div key={mod.id} className="p-6 border border-gray-100 rounded-2xl hover:shadow-xl hover:border-orange-200 transition-all flex flex-col justify-between group bg-gray-50/30">
-                  <div>
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl"><FileText size={24} /></div>
-                      <span className="px-3 py-1 bg-yellow-200 text-yellow-700 text-[10px] font-black rounded-lg uppercase tracking-widest">{mod.status}</span>
-                    </div>
-                    <h3 className="font-bold text-gray-800 text-lg mb-2 leading-tight line-clamp-2">{mod.issue_title}</h3>
-                    <p className="text-xs text-gray-400 font-medium">Diperbarui: {mod.report_date}</p>
-                  </div>
-                  <div className="mt-8 flex gap-2">
-                    <button onClick={() => handleOpenEditor(mod)} className="flex-1 flex justify-center items-center gap-2 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all text-xs font-bold">
-                      <Edit size={16} /> Edit
-                    </button>
-                    <button onClick={() => handleDeleteClick(mod)} className="px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-100">
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </div>
-              ))}
+
+  {loading ? (
+
+    <div className="h-full flex items-center justify-center">
+      <p className="text-gray-500 text-lg font-medium">
+        Loading...
+      </p>
+    </div>
+
+  ) : modules.length === 0 ? (
+
+    <div className="h-full flex items-center justify-center">
+      <p className="text-gray-400 text-lg font-medium">
+        Belum ada pengaduan
+      </p>
+    </div>
+
+  ) : (
+
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      {modules.map(mod => (
+        <div
+          key={mod.id}
+          className="p-6 border border-gray-100 rounded-2xl hover:shadow-xl hover:border-orange-200 transition-all flex flex-col justify-between group bg-gray-50/30"
+        >
+          <div>
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+                <FileText size={24} />
+              </div>
+
+              <span className="px-3 py-1 bg-yellow-200 text-yellow-700 text-[10px] font-black rounded-lg uppercase tracking-widest">
+                {mod.status}
+              </span>
             </div>
+
+            <h3 className="font-bold text-gray-800 text-lg mb-2 leading-tight line-clamp-2">
+              {mod.issue_title}
+            </h3>
+
+            <p className="text-xs text-gray-400 font-medium">
+              Diperbarui: {mod.report_date}
+            </p>
           </div>
+
+          <div className="mt-8 flex gap-2">
+            <button
+              onClick={() => handleOpenEditor(mod)}
+              className="flex-1 flex justify-center items-center gap-2 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all text-xs font-bold"
+            >
+              <Edit size={16} />
+              Edit
+            </button>
+
+            <button
+              onClick={() => handleDeleteClick(mod)}
+              className="px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-100"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+        </div>
+      ))}
+
+    </div>
+
+  )}
+
+</div>
         </>
       ) : (
         <div className="flex flex-col h-full space-y-4">

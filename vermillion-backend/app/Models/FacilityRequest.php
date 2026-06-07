@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\Facility;
+use App\Models\User;
 class FacilityRequest extends Model
 {
     protected $table = 'facility_requests';
-
+    public $timestamps = false;
     protected $fillable = [
         'user_id',
         'facility_id',
