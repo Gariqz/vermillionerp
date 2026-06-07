@@ -35,12 +35,31 @@ Route::get('/finance/dashboard', [FinanceController::class, 'getDashboard']);
 Route::put('/finance/reports/{id}/status', [FinanceController::class, 'updateReportStatus']);
 Route::get('/finance/income', [FinanceController::class, 'getIncomes']);
 Route::get('/contacts', function () {
-    // Mengambil data user yang memiliki tim/divisi dari database
-    $users = User::whereNotNull('team')
-        ->get(['id', 'name', 'team', 'role', 'phone']);
+    // 1. Ambil semua user beserta relasinya ke host_profiles
+    $users = User::with('hostProfile')->get();
+    
+    // 2. Format ulang datanya untuk frontend
+    $contacts = $users->map(function ($user) {
+        $teamName = null;
+        
+        // Cek jika role-nya Host, ambil dari hostProfile. Jika bukan, pakai nama role-nya.
+        if (strtolower($user->role) === 'host') {
+            $teamName = $user->hostProfile?->team ?? 'No Team'; 
+        } else {
+            $teamName = strtoupper($user->role); 
+        }
+
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'phone' => $user->phone,
+            'role' => $user->role,
+            'team' => $teamName, 
+        ];
+    });
     
     return response()->json([
         'success' => true,
-        'data' => $users
+        'data' => $contacts
     ]);
 });

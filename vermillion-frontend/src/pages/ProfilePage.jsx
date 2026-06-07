@@ -4,12 +4,9 @@ import {
   Calendar, ShieldCheck, Camera, 
   Edit3, KeyRound, LogOut 
 } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
 
 const ProfilePage = () => {
-  const location = useLocation();
   const user = JSON.parse(localStorage.getItem("user"));
-  const isProcurement = location.pathname.includes('/procurement');
   const userData = {
     nama: user?.name,
     email: user?.email,
