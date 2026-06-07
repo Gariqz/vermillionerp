@@ -32,7 +32,9 @@ const IzinHost = () => {
   const loadLeaves = async () => {
     try {
       const response = await axios.get(
-        `${API_URL}/leaves`
+        `${API_URL}/leaves`, {
+          headers: { "ngrok-skip-browser-warning": "69420" }
+        }
       );
 
       const myLeaves = response.data.filter(
@@ -60,7 +62,7 @@ const IzinHost = () => {
         leave_type: formData.leave_type,
         date_range: formData.date_range,
         reason: formData.reason
-      });
+      }, {headers: { "ngrok-skip-browser-warning": "69420" }});
 
       setModalOpen(false);
       setSuccessOpen(true);
