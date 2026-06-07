@@ -15,7 +15,9 @@ const LaporanHost = () => {
   });
 
   const fetchReports = () => {
-    fetch(`${import.meta.env.VITE_API_URL}/host/${user.id}/reports`)
+    fetch(`${import.meta.env.VITE_API_URL}/host/${user.id}/reports`, {
+      headers: { "ngrok-skip-browser-warning": "69420" }
+    })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -54,6 +56,7 @@ const LaporanHost = () => {
 
     fetch(`http://127.0.0.1:8000/api/host/${user.id}/reports`, {
       method: 'POST',
+      headers: { "ngrok-skip-browser-warning": "69420" },
       body: data
     })
     .then(res => res.json())

@@ -11,8 +11,13 @@ const BerandaHost = () => {
     request_count: 0
   });
 
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/login/host/${user.id}/dashboard`)
+ useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/host/${user.id}/dashboard`, {
+      // Tambahkan headers ini biar Ngrok nggak ngeblokir
+      headers: {
+        "ngrok-skip-browser-warning": "69420"
+      }
+    })
       .then(res => res.json())
       .then(result => {
         if (!result.message) {
