@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\HostController;
 use App\Http\Controllers\FinanceController;
+use App\Models\User;
 
 Route::get('/employees', [EmployeeController::class, 'index']); // Baca Data
 Route::post('/employees', [EmployeeController::class, 'store']); // Tambah Data
@@ -33,3 +34,13 @@ Route::post('/host/{user_id}/reports', [HostController::class, 'submitReport']);
 Route::get('/finance/dashboard', [FinanceController::class, 'getDashboard']);
 Route::put('/finance/reports/{id}/status', [FinanceController::class, 'updateReportStatus']);
 Route::get('/finance/income', [FinanceController::class, 'getIncomes']);
+Route::get('/contacts', function () {
+    // Mengambil data user yang memiliki tim/divisi dari database
+    $users = User::whereNotNull('team')
+        ->get(['id', 'name', 'team', 'role', 'phone']);
+    
+    return response()->json([
+        'success' => true,
+        'data' => $users
+    ]);
+});
