@@ -17,16 +17,22 @@ return new class extends Migration
         $table->foreignId('user_id')
             ->constrained('users');
 
+        // Tambahan buat request barang baru
+        $table->string('nama_barang')->nullable();
+        $table->string('link_toko')->nullable();
+        $table->text('deskripsi')->nullable();
+
         $table->foreignId('facility_id')
+            ->nullable() // Dibikin nullable karena request barang baru ga punya facility_id
             ->constrained('facilities');
 
-        $table->date('request_date');
+        $table->date('request_date')->nullable();
 
-        $table->dateTime('start_datetime');
+        $table->dateTime('start_datetime')->nullable();
 
-        $table->dateTime('end_datetime');
+        $table->dateTime('end_datetime')->nullable();
 
-        $table->text('purpose');
+        $table->text('purpose')->nullable();
 
         $table->enum('status', [
             'Pending',
@@ -42,7 +48,7 @@ return new class extends Migration
 
         $table->text('notes')->nullable();
 
-        $table->timestamp('created_at')->useCurrent();
+        $table->timestamps(); // Pake timestamps standar aja
     });
 }
 };

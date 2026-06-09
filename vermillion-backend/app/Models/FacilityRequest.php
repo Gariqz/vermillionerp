@@ -9,14 +9,19 @@ class FacilityRequest extends Model
 {
     protected $table = 'facility_requests';
 
-    public $timestamps = false;
-
     protected $fillable = [
         'user_id',
         'nama_barang',
         'link_toko',
         'deskripsi',
-        'status'
+        'status',
+        'facility_id',
+        'request_date',
+        'start_datetime',
+        'end_datetime',
+        'purpose',
+        'approved_by',
+        'notes'
     ];
 
     public function user()
