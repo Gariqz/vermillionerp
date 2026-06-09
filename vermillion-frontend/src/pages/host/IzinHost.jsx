@@ -149,7 +149,7 @@ const IzinHost = () => {
                   </h4>
 
                   <p className="text-sm text-gray-600">
-                    {item.date_range}
+                    {item.start_date} s/d {item.end_date}
                   </p>
 
                   <p className="text-xs text-gray-500">
@@ -210,19 +210,38 @@ const IzinHost = () => {
                 </option>
               </select>
 
-              <input
-                type="text"
-                placeholder="Contoh: 20 Juni - 22 Juni"
-                required
-                value={formData.date_range}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    date_range: e.target.value
-                  })
-                }
-                className="w-full p-3 rounded-xl border"
-              />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-500 ml-1">Mulai</label>
+                  <input
+                    type="date"
+                    required
+                    value={formData.start_date}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        start_date: e.target.value
+                      })
+                    }
+                    className="w-full p-3 rounded-xl border"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-500 ml-1">Selesai</label>
+                  <input
+                    type="date"
+                    required
+                    value={formData.end_date}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        end_date: e.target.value
+                      })
+                    }
+                    className="w-full p-3 rounded-xl border"
+                  />
+                </div>
+              </div>
 
               <textarea
                 rows="4"

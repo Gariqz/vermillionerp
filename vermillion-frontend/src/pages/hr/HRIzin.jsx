@@ -426,7 +426,7 @@ const HRIzin = () => {
 
             <p className="text-center text-gray-500 mb-6">
               {selectedLeave.leave_type} •{' '}
-              {selectedLeave.date_range}
+              {selectedLeave.start_date} - {selectedLeave.end_date}
             </p>
 
             <div className="flex gap-2">
