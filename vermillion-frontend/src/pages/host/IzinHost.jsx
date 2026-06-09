@@ -20,7 +20,8 @@ const IzinHost = () => {
 
   const [formData, setFormData] = useState({
     leave_type: "",
-    date_range: "",
+    start_date: "",
+    end_date: "",
     reason: ""
   });
 
