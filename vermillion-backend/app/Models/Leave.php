@@ -21,5 +21,4 @@ class Leave extends Model
     {
         return $this->belongsTo(User::class, 'employee_id');
     }
-    public $timestamps = false;
 }

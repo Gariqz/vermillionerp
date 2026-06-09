@@ -21,6 +21,7 @@ public function store(Request $request)
     try {
 
         $request->validate([
+            'employee_id' => 'required|exists:users,id',
             'leave_type' => 'required|in:Cuti,Izin',
             'date_range' => 'required|string',
             'reason' => 'required|string'
