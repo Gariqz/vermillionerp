@@ -233,9 +233,25 @@ const BerandaFinance = () => {
             </button>
             <h3 className="text-lg md:text-xl font-bold text-text-primary mb-6">Bukti Screenshot Laporan</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {selectedImages.map((img, idx) => (
-                <img key={idx} src={`${API_BASE_URL.replace('/api', '')}/storage/${img.image_path}`} alt="bukti" className="w-full rounded-xl border border-gray-200 shadow-sm" />
-              ))}
+              {selectedImages.map((img, idx) => {
+                const baseUrl = API_BASE_URL.replace('/api', '');
+                const imageSrc = img.image_path.startsWith('http') 
+                  ? img.image_path 
+                  : `${baseUrl}/storage/${img.image_path}`;
+                
+                return (
+                  <img 
+                    key={idx} 
+                    src={imageSrc} 
+                    alt="bukti" 
+                    className="w-full rounded-xl border border-gray-200 shadow-sm" 
+                    onError={(e) => {
+                      e.target.onerror = null; 
+                      e.target.src = 'https://via.placeholder.com/400x300?text=Gambar+Tidak+Ditemukan';
+                    }}
+                  />
+                );
+              })}
               {selectedImages.length === 0 && <p className="text-gray-500 text-sm italic col-span-2">Tidak ada gambar bukti.</p>}
             </div>
           </div>
